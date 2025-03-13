@@ -1,6 +1,6 @@
 # Dashboard Bike Sharing
 
-[Bike Data Dashboard Streamlit App](https://bikesharing-dashboard-fa.streamlit.app/)
+[Bike Data Dashboard Streamlit App](https://bikesharing-dashboard-faa.streamlit.app/)
 
 ## Overview
 Proyek ini adalah dashboard interaktif yang dibangun menggunakan Streamlit untuk menganalisis data penyewaan sepeda. Dashboard ini menyediakan berbagai visualisasi dan analisis, termasuk pola peminjaman berdasarkan waktu dan kondisi cuaca
@@ -8,13 +8,14 @@ Proyek ini adalah dashboard interaktif yang dibangun menggunakan Streamlit untuk
 ## Installation
 1. Clone repository ke file lokal:
 ```
-git clone https://github.com/xazhurea/Bikesharing_dashboard.git
+git clone https://github.com/xazhurea/BikeSharing-dashboard.git
 ```
 2. Install required Python packages:
 ```
 pip install -r requirements.txt
 ```
 3. Buat dan Aktifkan Virtual Environment
+
 Untuk Windows:
 ```
 python -m venv venv
