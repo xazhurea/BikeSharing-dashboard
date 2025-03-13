@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.cluster.hierarchy import linkage, dendrogram
-from sklearn.preprocessing import StandardScaler
+
 
 # Load data
 def load_data():
@@ -14,8 +13,8 @@ df = load_data()
 
 # Sidebar
 st.sidebar.header("Filter Tanggal")
-date_range = st.sidebar.date_input("Pilih Rentang Tanggal", (df['dteday'].min(), df['dteday'].max()))
-start_date, end_date = date_range
+start_date = st.sidebar.date_input("Tanggal Mulai", df['dteday'].min())
+end_date = st.sidebar.date_input("Tanggal Akhir", df['dteday'].max())
 
 # Filter data berdasarkan tanggal
 filtered_df = df[(df['dteday'] >= str(start_date)) & (df['dteday'] <= str(end_date))]
@@ -32,7 +31,7 @@ col4.metric("Rata-rata Pengguna Terdaftar", round(filtered_df['registered'].mean
 
 # Pola Peminjaman Berdasarkan Waktu
 st.header("Pola Peminjaman Sepeda Berdasarkan Waktu ⏰")
-st.write("Analisis ini menunjukkan pola peminjaman sepeda berdasarkan waktu. Selain itu, terdapat analisis mengenai perbedaan pola waktu berdasarkan hari libur serta perbedaan antara pengguna casual dan registered.")
+st.write("Analisis ini menunjukkan pola peminjaman sepeda berdasarkan waktu. Hal ini mencakup analisis mengenai perbedaan pola waktu berdasarkan hari libur serta perbedaan antara pengguna casual dan registered.")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -54,20 +53,29 @@ with col2:
 st.header("Pola Peminjaman Berdasarkan Iklim")
 st.write("Analisis ini mengkaji pengaruh musim, kondisi cuaca, dan kecepatan angin terhadap jumlah peminjaman sepeda.")
 
-st.write("#### Pengaruh Musim terhadap Jumlah Peminjaman Sepeda")
-fig, ax = plt.subplots(figsize=(10, 5))
-sns.boxplot(data=filtered_df, x='season', y='cnt')
+st.write("#### Tingkat Peminjaman Sepeda berdasarkan Musim")
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.barplot(data=filtered_df, x='season', y='cnt', estimator='mean', palette="coolwarm", ax=ax)
+ax.set_xlabel("Musim")
+ax.set_ylabel("Rata-rata Penyewaan Sepeda")
+ax.set_title("Rata-rata Penyewaan Sepeda Berdasarkan Musim")
 st.pyplot(fig)
 
-st.write("#### Pengaruh Kondisi Cuaca terhadap Jumlah Peminjaman Sepeda")
+st.write("#### Tingkat Peminjaman Sepeda berdasarkan Cuaca")
 fig, ax = plt.subplots(figsize=(8, 5))
-sns.boxplot(data=filtered_df, x='weathersit', y='cnt')
+sns.barplot(data=filtered_df, x='weathersit', y='cnt', estimator='mean', ax=ax)
+ax.set_xlabel("Cuaca")  
+ax.set_ylabel("Jumlah Penyewaan Sepeda")
 st.pyplot(fig)
+
 
 st.write("#### Pengaruh Kecepatan Angin terhadap Peminjaman Sepeda")
 fig, ax = plt.subplots(figsize=(8, 5))
-sns.scatterplot(x='windspeed', y='cnt', data=filtered_df)
+sns.regplot(x='windspeed', y='cnt', data=filtered_df, scatter_kws={'alpha':0.5}, ax=ax)
+ax.set_xlabel("Kecepatan Angin")  
+ax.set_ylabel("Jumlah Penyewaan Sepeda")
 st.pyplot(fig)
+
 
 
 # Tabs untuk Analisis RFM
@@ -106,20 +114,18 @@ with tab3:
 st.header("Clustering Berdasarkan Jam")
 st.write("Analisis ini mengelompokkan pola peminjaman sepeda berdasarkan jam dalam sehari.")
 
-# Pilih fitur numerik
-clustering_data = filtered_df[['hr', 'cnt', 'temp', 'hum']]
+# Kategori jam
+bins = [0, 5, 9, 15, 19, 23]
+labels = ['Dini Hari', 'Pagi', 'Siang', 'Sore', 'Malam']
+filtered_df['time_category'] = pd.cut(filtered_df['hr'], bins=bins, labels=labels, right=True)
 
-# Standarisasi data
-scaler = StandardScaler()
-scaled_data = scaler.fit_transform(clustering_data)
+# Hitung Total Sewa
+time_cluster = filtered_df.groupby('time_category')['cnt'].sum().reset_index()
 
-# Hierarchical Clustering
-linked = linkage(scaled_data, method='ward')
-
-# Plot Dendrogram
-fig, ax = plt.subplots(figsize=(10, 5))
-dendrogram(linked, labels=clustering_data['hr'].astype(str).values)
-ax.set_title("Dendrogram Clustering Berdasarkan Jam")
-ax.set_xlabel("Jam")
-ax.set_ylabel("Jarak")
+# Visualisasi
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.barplot(data=time_cluster, x='time_category', y='cnt', palette="coolwarm", ax=ax)
+ax.set_xlabel("Kategori Waktu")
+ax.set_ylabel("Jumlah Penyewaan Sepeda")
+ax.set_title("Jumlah Penyewaan Sepeda Berdasarkan Kategori Waktu")
 st.pyplot(fig)
