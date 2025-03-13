@@ -11,6 +11,9 @@ def load_data():
 
 df = load_data()
 
+#memastikan data dalam format datetime
+df['dteday'] = pd.to_datetime(df['dteday'])
+
 # Sidebar
 st.sidebar.header("Filter Tanggal")
 start_date = st.sidebar.date_input("Tanggal Mulai", df['dteday'].min())
